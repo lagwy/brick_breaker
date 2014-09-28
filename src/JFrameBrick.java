@@ -1,5 +1,5 @@
 /**
- * Applet Brick Breaker
+ * JFrame Brick Breaker
  * 
  * @author Luis Angel, Jorge Marquez, Valeria Marroquin
  */
@@ -106,10 +106,10 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         //Copiar esta parte del código hacia donde vayan a estar los bricks
         //Aquí debe estar un error
         if (basPelota.colisiona(basBarra)){
-            if (basPelota.getAncho() < basBarra.getAncho() / 2){
+            if (basPelota.getX()  < basBarra.getX() + basBarra.getAncho() / 2){
                 iDirPelota = 2;
             } 
-            if (basPelota.getX() >= basBarra.getAncho() / 2){
+            if (basPelota.getX() >= basBarra.getX() + basBarra.getAncho() / 2){
                 iDirPelota = 1;
             }
         }
@@ -209,7 +209,11 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         }  
         if (ke.getKeyCode() == KeyEvent.VK_SPACE && bPegado){
             bPegado = false;
-            iDirPelota = 1;
+            if (basBarra.getX() + basBarra.getAncho() / 2 < getWidth() / 2){
+                iDirPelota = 2;
+            } else {
+                iDirPelota = 1;
+            }
         }
         if (ke.getKeyCode() == KeyEvent.VK_LEFT){
             iDirBarra = 2; //Direccion a la izquierda
