@@ -11,6 +11,7 @@ import java.awt.Toolkit;
 import java.net.URL;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.LinkedList;
 
 
 public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
@@ -23,9 +24,12 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     private Image imaImagenFrame;
     private Base basBarra; //Se crea la base llamada Barra
     private Base basPelota; //Se crea la pelota
+    private Base basAnfetamina; //Se crea la base anfetamina
     private int iDirBarra;
     private int iDirPelota; //Direccion de la pelota
     private boolean bPegado; //Cuando la pelota debe ir pegada a la barra
+    private boolean bPausado; //Variable que indica cuando el juego esta pausado
+    private LinkedList lnkAnfetaminas; //Lista encadenada con todos los bricks
     
     
     /*
@@ -40,6 +44,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         iDirBarra = 0; //La direccion es 0 para que no se mueva la barra
         iDirPelota = 0; //La pelota no se mueve
         bPegado = true; //Inicia la barra con la pelota pegada
+        bPausado = false; //Al comenzar el juego no esta pausado
         //Se crea y posiciona la barra
         URL urlImagenBarra = this.getClass().getResource("barrita.jpg");
         basBarra = new Base (0, 0, 
@@ -52,6 +57,16 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                 Toolkit.getDefaultToolkit().getImage(urlImagenPelota));
         basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2 - (basPelota.getAncho() / 2));
         basPelota.setY(basBarra.getY() - basPelota.getAlto());
+        
+        //Se inicializa la lista con las anfetaminas
+        lnkAnfetaminas = new LinkedList();
+        URL urlImagenAnfetamina = this.getClass().getResource("anfetamina.jpg");
+        basAnfetamina = new Base(0, 0, 
+                Toolkit.getDefaultToolkit().getImage(urlImagenAnfetamina));
+        basAnfetamina.setX(getWidth() / 2);
+        basAnfetamina.setY(getHeight() / 2);
+        //Se crea solo uno para casos de prueba
+        lnkAnfetaminas.add(basAnfetamina);
         
         setBackground (Color.yellow);
         addKeyListener(this);
@@ -117,8 +132,10 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     
     public void run(){
         while (true){
-            actualiza();
-            checaColision();
+            if (!bPausado){
+                actualiza();
+                checaColision();   
+            }
             repaint();
             try	{
                 // El thread se duerme.
@@ -196,6 +213,11 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         
         g.drawImage (basPelota.getImagen(), basPelota.getX(),
                 basPelota.getY(), this);
+        for (Object basBrick : lnkAnfetaminas){
+            basAnfetamina = (Base) basBrick;
+            g.drawImage(basAnfetamina.getImagen(), basAnfetamina.getX(), 
+                    basAnfetamina.getY(), this);
+        }
     }
 
     @Override
@@ -214,6 +236,9 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             } else {
                 iDirPelota = 1;
             }
+        }
+        if (ke.getKeyCode() == KeyEvent.VK_P){
+            bPausado = !bPausado;
         }
         if (ke.getKeyCode() == KeyEvent.VK_LEFT){
             iDirBarra = 2; //Direccion a la izquierda
