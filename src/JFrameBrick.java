@@ -25,6 +25,11 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     private Base basBarra; //Se crea la base llamada Barra
     private Base basPelota; //Se crea la pelota
     private Base basAnfetamina; //Se crea la base anfetamina
+    //Se crean dos bases para los marcos
+    private Base basMarcoDer; //Marcos derecha
+    private Base basMarcoIzq; //Marco izquierda
+    private Base basMarcoArr; //Marcos arriba
+    private Base basMarcoAbj; //Marcos abajo
     private int iDirBarra;
     private int iDirPelota; //Direccion de la pelota
     private boolean bPegado; //Cuando la pelota debe ir pegada a la barra
@@ -71,6 +76,13 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             //Se crea solo uno para casos de prueba
             lnkAnfetaminas.add(basAnfetamina);
         }
+        
+        //Se inicializan los marcos
+        URL urlImagenLados = this.getClass().getResource("barra_lados_am.png");
+        basMarcoDer = new Base(0,0, Toolkit.getDefaultToolkit().
+                getImage(urlImagenLados));
+        basMarcoIzq = new Base(getWidth() - basMarcoDer.getAncho(), 0, 
+                Toolkit.getDefaultToolkit().getImage(urlImagenLados));
         
         setBackground (Color.yellow);
         addKeyListener(this);
@@ -135,15 +147,36 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         for (Object basBrick : lnkAnfetaminas){
             Base basAnfetamina = (Base) basBrick;
             if (basPelota.colisiona(basAnfetamina)){
-                if (basPelota.getX() < basAnfetamina.getX() + basAnfetamina.getAncho() / 2){ //Parte izquierda
-                    if (basPelota.getY() + basPelota.getAlto()< basAnfetamina.getY() + basAnfetamina.getAlto() / 2){
-                        
+                if(basAnfetamina.getX() + basAnfetamina.getAncho() < 
+                        basPelota.getX()){
+                    if(iDirPelota == 2){
+                        iDirPelota = 1;
+                    } else {
+                        iDirPelota = 4;
                     }
                 }
-                if (basPelota.getX() >= basAnfetamina.getX() + basAnfetamina.getAncho() / 2){ //Parte derecha
-                    if (basPelota.getY() >= basAnfetamina.getY() + basAnfetamina.getAlto() / 2){
-                        
-                    } 
+                if(basAnfetamina.getX() > basPelota.getX() + basPelota.
+                        getAncho()){
+                    if(iDirPelota == 1){
+                        iDirPelota = 2;
+                    } else {
+                        iDirPelota = 3;
+                    }
+                }
+                if(basAnfetamina.getY() + basAnfetamina.getAlto() < 
+                        basPelota.getY()){
+                    if(iDirPelota == 1){
+                        iDirPelota = 4;
+                    } else {
+                        iDirPelota = 3;
+                    }
+                }
+                if (basPelota.getY() + basPelota.getAlto() > basAnfetamina.getY()){
+                    if (iDirPelota == 4){
+                        iDirPelota= 1;
+                    } else {
+                        iDirPelota = 2;
+                    }
                 }
             }
         }
@@ -212,11 +245,21 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             ("background1.png");
             Image imaImagenEspacio = Toolkit.getDefaultToolkit().
                 getImage(urlImagenFondo);
-        
-            //Se despliega la imagen de fondo
-            graGraficaFrame.drawImage(imaImagenEspacio, 0, 10,
+            
+            //Se crea la imagen para cuando el juego este pausado
+            URL urlImagenPausa = this.getClass().getResource("pausa.png");
+            Image imaImagenPausa = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenPausa);
+            
+            if (bPausado){
+                graGraficaFrame.drawImage(imaImagenPausa, 0, 10, this);
+            } else {
+                //Se despliega la imagen de fondo
+                graGraficaFrame.drawImage(imaImagenEspacio, 0, 10,
                 getWidth(), getHeight(), this);
         
+            }
+            
         
 
         // Actualiza el Foreground.
@@ -228,15 +271,26 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     }
     
     public void paint1(Graphics g) {
-        g.drawImage(basBarra.getImagen(), basBarra.getX(), 
+        if (!bPausado){
+            
+            //Se pinta la barra
+            g.drawImage(basBarra.getImagen(), basBarra.getX(), 
                 basBarra.getY(), this);
-        
-        g.drawImage (basPelota.getImagen(), basPelota.getX(),
+            
+            //Se pinta la pelota
+            g.drawImage (basPelota.getImagen(), basPelota.getX(),
                 basPelota.getY(), this);
-        for (Object basBrick : lnkAnfetaminas){
-            basAnfetamina = (Base) basBrick;
-            g.drawImage(basAnfetamina.getImagen(), basAnfetamina.getX(), 
+            for (Object basBrick : lnkAnfetaminas){
+                basAnfetamina = (Base) basBrick;
+                g.drawImage(basAnfetamina.getImagen(), basAnfetamina.getX(), 
                     basAnfetamina.getY(), this);
+            }
+            
+            //Se pintan los marcos
+            g.drawImage(basMarcoDer.getImagen(), basMarcoDer.getX(), 
+                    basMarcoDer.getY(), this);
+            g.drawImage(basMarcoIzq.getImagen(), basMarcoIzq.getX(),
+                    basMarcoIzq.getY(), this);
         }
     }
 
