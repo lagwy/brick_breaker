@@ -46,27 +46,31 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         bPegado = true; //Inicia la barra con la pelota pegada
         bPausado = false; //Al comenzar el juego no esta pausado
         //Se crea y posiciona la barra
-        URL urlImagenBarra = this.getClass().getResource("barrita.jpg");
+        URL urlImagenBarra = this.getClass().getResource("barrita.png");
         basBarra = new Base (0, 0, 
                 Toolkit.getDefaultToolkit().getImage(urlImagenBarra));
         basBarra.setX(getWidth() / 2 - basBarra.getAncho() / 2);
         basBarra.setY(getHeight() - 100);
         
-        URL urlImagenPelota = this.getClass().getResource("bolita.jpg");
+        URL urlImagenPelota = this.getClass().getResource("bolita.png");
         basPelota = new Base (0, 0, 
                 Toolkit.getDefaultToolkit().getImage(urlImagenPelota));
-        basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2 - (basPelota.getAncho() / 2));
+        basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2 - 
+                (basPelota.getAncho() / 2));
         basPelota.setY(basBarra.getY() - basPelota.getAlto());
         
         //Se inicializa la lista con las anfetaminas
         lnkAnfetaminas = new LinkedList();
-        URL urlImagenAnfetamina = this.getClass().getResource("anfetamina.jpg");
-        basAnfetamina = new Base(0, 0, 
-                Toolkit.getDefaultToolkit().getImage(urlImagenAnfetamina));
-        basAnfetamina.setX(getWidth() / 2);
-        basAnfetamina.setY(getHeight() / 2);
-        //Se crea solo uno para casos de prueba
-        lnkAnfetaminas.add(basAnfetamina);
+        for (int iI = 0; iI <= 400; iI+= 100){
+            URL urlImagenAnfetamina = this.getClass().
+                    getResource("anfetamina.jpg");
+            basAnfetamina = new Base(0, 0, 
+                    Toolkit.getDefaultToolkit().getImage(urlImagenAnfetamina));
+            basAnfetamina.setX(getWidth() / 4 + iI);
+            basAnfetamina.setY(getHeight() / 2);
+            //Se crea solo uno para casos de prueba
+            lnkAnfetaminas.add(basAnfetamina);
+        }
         
         setBackground (Color.yellow);
         addKeyListener(this);
@@ -118,14 +122,29 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             bPegado = true;
             //Agregar el código que quita las vidas, etc
         }
-        //Copiar esta parte del código hacia donde vayan a estar los bricks
-        //Aquí debe estar un error
         if (basPelota.colisiona(basBarra)){
             if (basPelota.getX()  < basBarra.getX() + basBarra.getAncho() / 2){
                 iDirPelota = 2;
             } 
             if (basPelota.getX() >= basBarra.getX() + basBarra.getAncho() / 2){
                 iDirPelota = 1;
+            }
+        }
+        
+        //Revisar si la pelota colisiona con alguna anfetamina
+        for (Object basBrick : lnkAnfetaminas){
+            Base basAnfetamina = (Base) basBrick;
+            if (basPelota.colisiona(basAnfetamina)){
+                if (basPelota.getX() < basAnfetamina.getX() + basAnfetamina.getAncho() / 2){ //Parte izquierda
+                    if (basPelota.getY() + basPelota.getAlto()< basAnfetamina.getY() + basAnfetamina.getAlto() / 2){
+                        
+                    }
+                }
+                if (basPelota.getX() >= basAnfetamina.getX() + basAnfetamina.getAncho() / 2){ //Parte derecha
+                    if (basPelota.getY() >= basAnfetamina.getY() + basAnfetamina.getAlto() / 2){
+                        
+                    } 
+                }
             }
         }
     }
@@ -189,12 +208,13 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         
         
             //Se crea la imagen de fondo
-            URL urlImagenFondo = this.getClass().getResource("espacio.png");
+            URL urlImagenFondo = this.getClass().getResource
+            ("background1.png");
             Image imaImagenEspacio = Toolkit.getDefaultToolkit().
                 getImage(urlImagenFondo);
         
             //Se despliega la imagen de fondo
-            graGraficaFrame.drawImage(imaImagenEspacio, 0, 0,
+            graGraficaFrame.drawImage(imaImagenEspacio, 0, 10,
                 getWidth(), getHeight(), this);
         
         
