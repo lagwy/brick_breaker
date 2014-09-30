@@ -4,14 +4,22 @@
  * @author Luis Angel, Jorge Marquez, Valeria Marroquin
  */
 import java.awt.Color;
-import javax.swing.JFrame;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.net.URL;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URL;
 import java.util.LinkedList;
+import javax.swing.JFrame;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
@@ -25,6 +33,8 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     private Base basBarra; //Se crea la base llamada Barra
     private Base basPelota; //Se crea la pelota
     private Base basAnfetamina; //Se crea la base anfetamina
+    private int iNivel; //Nivel actual
+    private boolean bCargoNivel; //Para saber si ya se cargo el nivel
     //Se crean dos bases para los marcos
     private Base basMarcoDer; //Marcos derecha
     private Base basMarcoIzq; //Marco izquierda
@@ -33,6 +43,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     private int iDirBarra;
     private int iDirPelota; //Direccion de la pelota
     private boolean bPegado; //Cuando la pelota debe ir pegada a la barra
+    private boolean bEmpieza;
     private boolean bPausado; //Variable que indica cuando el juego esta pausado
     private LinkedList lnkAnfetaminas; //Lista encadenada con todos los bricks
     
@@ -47,6 +58,9 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         //Se le da al JFrame el siguiente tamaño
         setSize(525,700);
         iDirBarra = 0; //La direccion es 0 para que no se mueva la barra
+        iNivel = 0; //primer nivel
+        bCargoNivel = false;
+        bEmpieza = false;
         iDirPelota = 0; //La pelota no se mueve
         bPegado = true; //Inicia la barra con la pelota pegada
         bPausado = false; //Al comenzar el juego no esta pausado
@@ -66,7 +80,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         
         //Se inicializa la lista con las anfetaminas
         lnkAnfetaminas = new LinkedList();
-        for (int iI = 0; iI <= 400; iI+= 100){
+        for (int iI = 0; iI < 300; iI+= 100){
             URL urlImagenAnfetamina = this.getClass().
                     getResource("anfetamina.jpg");
             basAnfetamina = new Base(0, 0, 
@@ -78,11 +92,29 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         }
         
         //Se inicializan los marcos
-        URL urlImagenLados = this.getClass().getResource("barra_lados_am.png");
+         URL urlImagenLados = this.getClass().getResource("barra_lados_am.png");
         basMarcoDer = new Base(0,0, Toolkit.getDefaultToolkit().
                 getImage(urlImagenLados));
-        basMarcoIzq = new Base(getWidth() - basMarcoDer.getAncho(), 0, 
+        basMarcoDer.setX(getWidth() - (basMarcoDer.getAncho()+46));
+        basMarcoDer.setY(basMarcoDer.getY()+78);
+        basMarcoIzq = new Base(0, 0, 
                 Toolkit.getDefaultToolkit().getImage(urlImagenLados));
+        basMarcoIzq.setX(basMarcoIzq.getAncho()+20);
+        basMarcoIzq.setY(basMarcoIzq.getY() +78);
+        URL urlImagenArribaAbajo = this.getClass().getResource
+                ("barra_arriabajo_am.png");
+        
+        //Marco de arriba
+        basMarcoArr = new Base(0,0, Toolkit.getDefaultToolkit().
+                getImage(urlImagenArribaAbajo));
+        basMarcoArr.setX(getWidth() - (basMarcoArr.getAncho()+68));
+        basMarcoArr.setY(basMarcoArr.getY()+78);
+        //Marco de abajo
+        basMarcoAbj = new Base(0, 0, 
+                Toolkit.getDefaultToolkit().getImage(urlImagenArribaAbajo));
+        basMarcoAbj.setX(getWidth() - (basMarcoArr.getAncho()+68));
+        basMarcoAbj.setY(getHeight() - 72);
+                    
         
         setBackground (Color.yellow);
         addKeyListener(this);
@@ -96,24 +128,21 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     }
     
     public void checaColision(){
-        if (basBarra.getX() <= 0){
-            basBarra.setX(0);
+        if (basBarra.colisiona(basMarcoIzq)){
+            basBarra.setX(basMarcoIzq.getAncho()+ 46);
         }
-        if (basBarra.getX() + basBarra.getAncho() > getWidth()){
-            basBarra.setX(getWidth() - basBarra.getAncho());
+        if (basBarra.colisiona(basMarcoDer)) {
+            basBarra.setX(getWidth() -(basMarcoDer.getAncho() + 145));
         }
-        
-        if (basPelota.getX() <= 0){
-            basPelota.setX(0);
-            if (iDirPelota == 3){
+        if (basPelota.colisiona(basMarcoIzq)){
+            if(iDirPelota == 3){
                 iDirPelota = 4;
             }
             if (iDirPelota == 2){
                 iDirPelota = 1;
             }
         }
-        if (basPelota.getX() + basPelota.getAncho() > getWidth()){
-            basPelota.setX(getWidth() - basPelota.getAncho());
+        if(basPelota.colisiona(basMarcoDer)){
             if (iDirPelota == 4){
                 iDirPelota = 3;
             } 
@@ -121,8 +150,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                 iDirPelota = 2;
             }
         }
-        if (basPelota.getY() <= 0){
-            basPelota.setY(0);
+        if(basPelota.colisiona(basMarcoArr)){
             if (iDirPelota == 1){
                 iDirPelota = 4;
             }
@@ -130,10 +158,10 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                 iDirPelota = 3;
             }
         }
-        if (basPelota.getY() - basPelota.getAlto() > getHeight()){
+        if (basPelota.colisiona(basMarcoAbj)){
             bPegado = true;
-            //Agregar el código que quita las vidas, etc
         }
+        
         if (basPelota.colisiona(basBarra)){
             if (basPelota.getX()  < basBarra.getX() + basBarra.getAncho() / 2){
                 iDirPelota = 2;
@@ -147,7 +175,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         for (Object basBrick : lnkAnfetaminas){
             Base basAnfetamina = (Base) basBrick;
             if (basPelota.colisiona(basAnfetamina)){
-                if(basAnfetamina.getX() + basAnfetamina.getAncho() < 
+                if(basAnfetamina.getX() < 
                         basPelota.getX()){
                     if(iDirPelota == 2){
                         iDirPelota = 1;
@@ -155,8 +183,8 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                         iDirPelota = 4;
                     }
                 }
-                if(basAnfetamina.getX() > basPelota.getX() + basPelota.
-                        getAncho()){
+                if(basAnfetamina.getX() + basAnfetamina.getAncho() > 
+                        basPelota.getX()){
                     if(iDirPelota == 1){
                         iDirPelota = 2;
                     } else {
@@ -171,7 +199,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                         iDirPelota = 3;
                     }
                 }
-                if (basPelota.getY() + basPelota.getAlto() > basAnfetamina.getY()){
+                if (basPelota.getY() + basPelota.getAlto() < basAnfetamina.getY()){
                     if (iDirPelota == 4){
                         iDirPelota= 1;
                     } else {
@@ -180,6 +208,39 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                 }
             }
         }
+    }
+    
+    public void cargaNivel() throws IOException{
+        if (iNivel == 1 && !bCargoNivel){
+            BufferedReader brwEntrada;
+            try {
+                brwEntrada = new BufferedReader(new FileReader("nivel1.txt"));
+            } catch(FileNotFoundException e){
+                File filPredeterminado = new File ("nivel0.txt");
+                PrintWriter prwSalida = new PrintWriter(filPredeterminado);
+                prwSalida.println("1");
+                prwSalida.println("100 100");
+                brwEntrada = new BufferedReader(new FileReader("nivel1.txt"));
+            }
+            String sAux = ""; //Se declara variable auxiliar vacia
+            int iCantidad; //Cantidad de bricks
+            iCantidad = Integer.parseInt(brwEntrada.readLine());
+            lnkAnfetaminas.clear();
+            lnkAnfetaminas = new LinkedList();
+            for (int iI = 0; iI < iCantidad; iI++){
+                sAux = brwEntrada.readLine();
+                URL urlImagenAnfetamina = this.getClass().
+                        getResource("anfetamina.jpg");
+                Base basAnfetamina = new Base (Integer.parseInt
+                (sAux.substring(0,sAux.indexOf(" "))),Integer.parseInt
+                ( sAux.substring(sAux.indexOf(" ")+1)), Toolkit.getDefaultToolkit().
+                        getImage(urlImagenAnfetamina));
+                lnkAnfetaminas.add(basAnfetamina);
+            } 
+        }
+        
+        
+        
     }
     
     public void run(){
@@ -202,10 +263,10 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     
     public void actualiza(){
         if (iDirBarra == 1){ //La direccion es la derecha
-            basBarra.setX(basBarra.getX() + 3);
+            basBarra.setX(basBarra.getX() + 4);
         }
         if (iDirBarra == 2){ //La direccion es a la izquierda
-            basBarra.setX(basBarra.getX() - 3);
+            basBarra.setX(basBarra.getX() - 4);
         }
         if (bPegado){
             basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2 - 
@@ -213,20 +274,20 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             basPelota.setY(basBarra.getY() - basPelota.getAlto());
         } else {
             if (iDirPelota == 1){
-                basPelota.setY(basPelota.getY() - 2);
-                basPelota.setX(basPelota.getX() + 2);
+                basPelota.setY(basPelota.getY() - 3);
+                basPelota.setX(basPelota.getX() + 3);
             }
             if (iDirPelota == 2){
-                basPelota.setY(basPelota.getY() - 2);
-                basPelota.setX(basPelota.getX() - 2);
+                basPelota.setY(basPelota.getY() - 3);
+                basPelota.setX(basPelota.getX() - 3);
             }
             if (iDirPelota == 3){
-                basPelota.setY(basPelota.getY() + 2);
-                basPelota.setX(basPelota.getX() - 2);
+                basPelota.setY(basPelota.getY() + 3);
+                basPelota.setX(basPelota.getX() - 3);
             }
             if (iDirPelota == 4){
-                basPelota.setY(basPelota.getY() + 2);
-                basPelota.setX(basPelota.getX() + 2);
+                basPelota.setY(basPelota.getY() + 3);
+                basPelota.setX(basPelota.getX() + 3);
             }
         }
     }
@@ -247,13 +308,21 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                 getImage(urlImagenFondo);
             
             //Se crea la imagen para cuando el juego este pausado
-            URL urlImagenPausa = this.getClass().getResource("pausa.png");
+            URL urlImagenPausa = this.getClass().getResource("pausa.gif");
             Image imaImagenPausa = Toolkit.getDefaultToolkit().
                     getImage(urlImagenPausa);
             
             if (bPausado){
                 graGraficaFrame.drawImage(imaImagenPausa, 0, 10, this);
             } else {
+                if (iNivel == 1 && bEmpieza){
+                    URL urlImagenInicio = this.getClass().
+                            getResource("inicio.jpg");
+                    Image imaImagenInicio = Toolkit.getDefaultToolkit().
+                            getImage(urlImagenInicio);
+                    graGraficaFrame.drawImage(imaImagenInicio, 0, 10, this);
+                }
+                
                 //Se despliega la imagen de fondo
                 graGraficaFrame.drawImage(imaImagenEspacio, 0, 10,
                 getWidth(), getHeight(), this);
@@ -287,10 +356,15 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             }
             
             //Se pintan los marcos
-            g.drawImage(basMarcoDer.getImagen(), basMarcoDer.getX(), 
+             g.drawImage(basMarcoDer.getImagen(), getWidth() - (basMarcoDer.getAncho()+46), 
                     basMarcoDer.getY(), this);
-            g.drawImage(basMarcoIzq.getImagen(), basMarcoIzq.getX(),
+            g.drawImage(basMarcoIzq.getImagen(), basMarcoIzq.getAncho()+20,
                     basMarcoIzq.getY(), this);
+            g.drawImage(basMarcoArr.getImagen(), getWidth() - (basMarcoArr.getAncho()+68), 
+                    basMarcoArr.getY(), this);
+            g.drawImage(basMarcoAbj.getImagen(), getWidth() - (basMarcoArr.getAncho()+68),
+                    getHeight() - 72, this);
+
         }
     }
 
@@ -316,6 +390,20 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         }
         if (ke.getKeyCode() == KeyEvent.VK_LEFT){
             iDirBarra = 2; //Direccion a la izquierda
+        }
+        if(ke.getKeyCode() == KeyEvent.VK_ENTER && !bEmpieza){
+            iNivel = 1;
+            try {
+                cargaNivel();
+            } catch (IOException ex) {
+                Logger.getLogger(JFrameBrick.class.getName()).
+                        log(Level.SEVERE, null, ex);
+            }
+            bEmpieza = true;
+        }
+        if (ke.getKeyCode() == KeyEvent.VK_R){
+            iNivel = 0;
+            bEmpieza = false;
         }
     }
 
