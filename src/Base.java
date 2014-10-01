@@ -81,6 +81,62 @@ public class Base {
         // si se colisionan regreso verdadero, sino regreso falso
         return recObjeto.intersects(recParametro);
     }
+    
+    public boolean colisionaArriba(Base aniParametro) {
+        // creo un objeto rectangulo a partir de este objeto Animal
+        Rectangle recObjeto = new Rectangle(this.getX(),this.getY(),
+                this.getAncho(), 1);
+        
+        // creo un objeto rectangulo a partir del objeto Animal parametro
+        Rectangle recParametro = new Rectangle(aniParametro.getX(),
+                aniParametro.getY(), aniParametro.getAncho(),
+                aniParametro.getAlto());
+        
+        // si se colisionan regreso verdadero, sino regreso falso
+        return recObjeto.intersects(recParametro);
+    }
+    
+    public boolean colisionaAbajo(Base aniParametro) {
+        // creo un objeto rectangulo a partir de este objeto Animal
+        Rectangle recObjeto = new Rectangle(this.getX(),this.getY() + 
+                this.getAlto(), this.getAncho(), 1);
+        
+        // creo un objeto rectangulo a partir del objeto Animal parametro
+        Rectangle recParametro = new Rectangle(aniParametro.getX(),
+                aniParametro.getY(), aniParametro.getAncho(),
+                aniParametro.getAlto());
+        
+        // si se colisionan regreso verdadero, sino regreso falso
+        return recObjeto.intersects(recParametro);
+    }
+    
+    public boolean colisionaIzquierda(Base aniParametro) {
+        // creo un objeto rectangulo a partir de este objeto Animal
+        Rectangle recObjeto = new Rectangle(this.getX(),this.getY(),
+                1, this.getAlto());
+        
+        // creo un objeto rectangulo a partir del objeto Animal parametro
+        Rectangle recParametro = new Rectangle(aniParametro.getX(),
+                aniParametro.getY(), aniParametro.getAncho(),
+                aniParametro.getAlto());
+        
+        // si se colisionan regreso verdadero, sino regreso falso
+        return recObjeto.intersects(recParametro);
+    }
+    
+    public boolean colisionaDerecha(Base aniParametro) {
+        // creo un objeto rectangulo a partir de este objeto Animal
+        Rectangle recObjeto = new Rectangle(this.getX() + this.getAncho(),
+                this.getY(), 1, this.getAlto());
+        
+        // creo un objeto rectangulo a partir del objeto Animal parametro
+        Rectangle recParametro = new Rectangle(aniParametro.getX(),
+                aniParametro.getY(), aniParametro.getAncho(),
+                aniParametro.getAlto());
+        
+        // si se colisionan regreso verdadero, sino regreso falso
+        return recObjeto.intersects(recParametro);
+    }
  
     public boolean colisiona(int iX, int iY) {
         // creo un objeto rectangulo a partir de este objeto Animal
