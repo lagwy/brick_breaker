@@ -164,12 +164,12 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         if(basBarra.colisiona(basSirena)){
             bSirena = false;
             basSirena.setY(-500);
-            basSirena.setX((int) Math.random() * (388) + 65);
+            basSirena.setX((int) (Math.random() * (388) + 65));
         }
         
         if(basSirena.colisiona(basMarcoAbj)){
             basSirena.setY(-500);
-            basSirena.setX(((int) Math.random()) * (388) + 65);
+            basSirena.setX((int)(Math.random() * (388) + 65));
         }
         
         if (basBarra.colisiona(basMarcoIzq)) {
@@ -514,29 +514,38 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     public void paint1(Graphics g) {
         if (!bPausado && bEmpieza && iVidas > 0) {
 
-            //Se pinta la barra
+            //Se pinta la barra dependiendo si esta el power up o no
             if (bSirena){
-                URL urlImagenBarraSirena = this.getClass().
+                URL urlImagenBarra = this.getClass().
                         getResource("barrita.png");
-                Image imaImagenBarraSirena = Toolkit.getDefaultToolkit().
-                    getImage(urlImagenBarraSirena);
+                Image imaImagenBarra = Toolkit.getDefaultToolkit().
+                        getImage(urlImagenBarra);
+                URL urlImagenPelota = this.getClass().getResource("bolita.png");
+                Image imaImagenPelota = Toolkit.getDefaultToolkit().
+                        getImage(urlImagenPelota);
+                basBarra.setImagen(imaImagenBarra);
+                basPelota.setImagen(imaImagenPelota);
                 g.drawImage(basBarra.getImagen(), basBarra.getX(),
                     basBarra.getY(), this);
-            } else {
+                g.drawImage(basPelota.getImagen(), basPelota.getX(),
+                        basPelota.getY(), this);
+            }
+            if(!bSirena){
                 URL urlImagenBarraSirena = this.getClass().
                         getResource("barra_sirena.gif");
                 Image imaImagenBarraSirena = Toolkit.getDefaultToolkit().
                     getImage(urlImagenBarraSirena);
                 basBarra.setImagen(imaImagenBarraSirena);
+                URL urlImagenPelotaSirena = this.getClass().getResource
+                    ("camioneta_bolita.gif");
+                Image imaImagenPelotaSirena = Toolkit.getDefaultToolkit().
+                      getImage(urlImagenPelotaSirena);
+                basPelota.setImagen(imaImagenPelotaSirena);
                 g.drawImage(basBarra.getImagen(), basBarra.getX(),
                     basBarra.getY(), this);
+                g.drawImage(basPelota.getImagen(), basPelota.getX(),
+                        basPelota.getY(), this);
             }
-            
-
-            //Se pinta la pelota
-            g.drawImage(basPelota.getImagen(), basPelota.getX(),
-                    basPelota.getY(), this);
-
             //Se pinta el power up
             if(basSirena.getY() + basSirena.getAlto() > 0 && !bPegado){
                 g.drawImage(basSirena.getImagen(), basSirena.getX(),
