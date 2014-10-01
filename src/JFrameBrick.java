@@ -224,7 +224,8 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         for (Object objAnfetamina : lnkAnfetaminas) {
             Base basAnfetamina = (Base) objAnfetamina;
                 
-                if(basAnfetamina.colisionaIzquierda(basPelota)){
+                if(basAnfetamina.colisionaIzquierda(basPelota) && 
+                        bComprueba == false){
                     if(iDirPelota == 1){
                         iDirPelota = 2;
                     }
@@ -232,8 +233,10 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                         iDirPelota = 3;
                     }
                     colision(basAnfetamina);
+                    bComprueba = true;
                 }
-                if (basAnfetamina.colisionaDerecha(basPelota)){
+                if (basAnfetamina.colisionaDerecha(basPelota) && 
+                        bComprueba == false){
                     if(iDirPelota == 2){
                         iDirPelota = 1;
                     }
@@ -241,8 +244,10 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                         iDirPelota = 4;
                     }
                     colision(basAnfetamina);
+                    bComprueba = true;
                 }
-                if(basAnfetamina.colisionaArriba(basPelota)){
+                if(basAnfetamina.colisionaArriba(basPelota) && 
+                        bComprueba == false){
                     if(iDirPelota == 3){
                         iDirPelota = 2;
                     }
@@ -250,8 +255,10 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                         iDirPelota = 1;
                     }
                     colision(basAnfetamina);
+                    bComprueba = true;
                 }
-                if(basAnfetamina.colisionaAbajo(basPelota)){
+                if(basAnfetamina.colisionaAbajo(basPelota) && 
+                        bComprueba == false){
                     if (iDirPelota == 1){
                         iDirPelota = 4;
                     }
@@ -259,6 +266,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                         iDirPelota = 3;
                     }
                     colision(basAnfetamina);
+                    bComprueba = true;
                 }
         }
         bComprueba = false;
@@ -507,8 +515,23 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         if (!bPausado && bEmpieza && iVidas > 0) {
 
             //Se pinta la barra
-            g.drawImage(basBarra.getImagen(), basBarra.getX(),
+            if (bSirena){
+                URL urlImagenBarraSirena = this.getClass().
+                        getResource("barrita.png");
+                Image imaImagenBarraSirena = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenBarraSirena);
+                g.drawImage(basBarra.getImagen(), basBarra.getX(),
                     basBarra.getY(), this);
+            } else {
+                URL urlImagenBarraSirena = this.getClass().
+                        getResource("barra_sirena.gif");
+                Image imaImagenBarraSirena = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenBarraSirena);
+                basBarra.setImagen(imaImagenBarraSirena);
+                g.drawImage(basBarra.getImagen(), basBarra.getX(),
+                    basBarra.getY(), this);
+            }
+            
 
             //Se pinta la pelota
             g.drawImage(basPelota.getImagen(), basPelota.getX(),
