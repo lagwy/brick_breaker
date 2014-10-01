@@ -51,6 +51,8 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     private boolean bPegado; //Cuando la pelota debe ir pegada a la barra
     private boolean bEmpieza;
     private boolean bPausado; //Variable que indica cuando el juego esta pausado
+    private boolean bGameOver; //Se termina el juego y se puede reiniciar
+    private boolean bComprueba; //Comprueba que no se re-cambie la dirección
     private LinkedList lnkAnfetaminas; //Lista encadenada con todos los bricks
     private int iScore;
 
@@ -67,6 +69,8 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         iScore = 0; //inicializa en cero 
         bCargoNivel = false;
         bEmpieza = false;
+        bGameOver = false;
+        bComprueba = false;
         iCantidadBricks = 0;
         iVidas = 3;
         iDirPelota = 0; //La pelota no se mueve
@@ -194,63 +198,78 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         for (Object basBrick : lnkAnfetaminas) {
             Base basAnfetamina = (Base) basBrick;
             if (basPelota.colisiona(basAnfetamina)) {
-                if (basAnfetamina.getX()
-                        < basPelota.getX()) {
-                    if (iDirPelota == 1) {
-                        iDirPelota = 3;
-                    }
-                    if (iDirPelota == 2) {
-                        iDirPelota = 4;
-                    }
-                    
-                }
-                if (basAnfetamina.getX() + basAnfetamina.getAncho()
-                        > basPelota.getX()) {
-                    if (iDirPelota == 1) {
-                        iDirPelota = 2;
-                    }
-                    if (iDirPelota == 2) {
-                        iDirPelota = 1;
-                    }
-                    if (iDirPelota == 3) {
-                        iDirPelota = 4;
-                    }else {
-                        iDirPelota = 3;
-                    }
-                }
-                if (basAnfetamina.getY() + basAnfetamina.getAlto()
-                        < basPelota.getY()) {
-                    if (iDirPelota == 1) {
-                        iDirPelota = 2;
-                    } 
-                    if (iDirPelota == 2) {
-                        iDirPelota = 1;
-                    }
-                }
-                if (basPelota.getY() + basPelota.getAlto() < basAnfetamina.getY()) {
-                    if (iDirPelota == 4) {
-                        iDirPelota = 1;
-                    } 
-                    if (iDirPelota == 3) {
-                        iDirPelota = 2;
-                    }
-                }
-                reposicionaBricks(basAnfetamina);
+                aucSonidoAnfetaminas.play();
+                reposicionaBricks(basAnfetamina); //Lo posiciona en Oblivion
                 iScore += 100;
                 iCantidadBricks--;
                 if (iCantidadBricks < 1) {
                     reposicionaBarra(basBarra);
                     reposicionaPelota(basPelota);
+                    if(iNivel !=2){
                     iNivel = 2;
                     try {
                     cargaNivel2();
                     } catch (IOException ex) {
                       Logger.getLogger(JFrameBrick.class.getName()).
                         log(Level.SEVERE, null, ex);
-                    }                   
+                    }    
+                    } else {
+                        bGameOver = true;
+                        iVidas = 0;
+                    }
+                                       
                 }
-            }           
+                if (basAnfetamina.getX() > basPelota.getX() && !bComprueba) {
+                    bComprueba = true;
+                    if (iDirPelota == 1) {
+                        iDirPelota = 2;
+                        break;
+                    }
+                    if (iDirPelota == 4) {
+                        iDirPelota = 3;
+                        break;
+                    }
+                    
+                }
+                if (basAnfetamina.getX() + basAnfetamina.getAncho() <= basPelota.getX() && !bComprueba) {
+                    bComprueba = true;
+                    if (iDirPelota == 2) {
+                        iDirPelota = 1;
+                        break;
+                    }
+                    if (iDirPelota == 3) {
+                        iDirPelota = 4;
+                        break;
+                    }
+                    
+                }
+                if (basAnfetamina.getY() + basAnfetamina.getAlto() <= basPelota.getY()) {
+                    bComprueba = true;
+                    if (iDirPelota == 1) {
+                        iDirPelota = 4;
+                        break;
+                    } 
+                    if (iDirPelota == 2) {
+                        iDirPelota = 3;
+                        break;
+                    }
+                }
+                if (basPelota.getY()  < basAnfetamina.getY() && !bComprueba) {
+                    bComprueba = true;
+                    if (iDirPelota == 4) {
+                        iDirPelota = 1;
+                        break;
+                    } 
+                    if (iDirPelota == 3) {
+                        iDirPelota = 2;
+                        break;
+                    }
+                }
+                
+                
+            }
         }
+        bComprueba = false;
     }
     
     public void reposicionaBricks(Base basAnfetamina) {
@@ -276,6 +295,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             BufferedReader brwEntrada;
             try {
                 brwEntrada = new BufferedReader(new FileReader("nivel1.txt"));
+                aucSonidoMusica.setRepeat(15);
                 aucSonidoMusica.play();
             } catch (FileNotFoundException e) {
                 File filPredeterminado = new File("nivel0.txt");
@@ -323,7 +343,9 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                 sAux = brwEntrada.readLine();
                 URL urlImagenAnfetamina = this.getClass().
                         getResource("anfetamina.jpg");
-                Base basAnfetamina = new Base(Integer.parseInt(sAux.substring(0, sAux.indexOf(" "))), Integer.parseInt(sAux.substring(sAux.indexOf(" ") + 1)), Toolkit.getDefaultToolkit().
+                Base basAnfetamina = new Base(Integer.parseInt(sAux.substring(0, 
+                        sAux.indexOf(" "))), Integer.parseInt(sAux.substring
+                        (sAux.indexOf(" ") + 1)), Toolkit.getDefaultToolkit().
                         getImage(urlImagenAnfetamina));
                 lnkAnfetaminas.add(basAnfetamina);
             }
@@ -345,6 +367,9 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                         + iexError.toString());
             }
         }
+        if(iVidas < 1 || iCantidadBricks < 1){
+            bGameOver = true;
+        }
     }
 
     public void actualiza() {
@@ -360,20 +385,20 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             basPelota.setY(basBarra.getY() - basPelota.getAlto());
         } else {
             if (iDirPelota == 1) {
-                basPelota.setY(basPelota.getY() - 3);
-                basPelota.setX(basPelota.getX() + 3);
+                basPelota.setY(basPelota.getY() - 2);
+                basPelota.setX(basPelota.getX() + 2);
             }
             if (iDirPelota == 2) {
-                basPelota.setY(basPelota.getY() - 3);
-                basPelota.setX(basPelota.getX() - 3);
+                basPelota.setY(basPelota.getY() - 2);
+                basPelota.setX(basPelota.getX() - 2);
             }
             if (iDirPelota == 3) {
-                basPelota.setY(basPelota.getY() + 3);
-                basPelota.setX(basPelota.getX() - 3);
+                basPelota.setY(basPelota.getY() + 2);
+                basPelota.setX(basPelota.getX() - 2);
             }
             if (iDirPelota == 4) {
-                basPelota.setY(basPelota.getY() + 3);
-                basPelota.setX(basPelota.getX() + 3);
+                basPelota.setY(basPelota.getY() + 2);
+                basPelota.setX(basPelota.getX() + 2);
             }
         }
     }
@@ -392,7 +417,8 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                 getImage(urlImagenFondo);
         
         //Se crea la imagen de fondo del nivel 2
-        URL urlImagenFondo1 = this.getClass().getResource("brickbreaker_verde.png");
+        URL urlImagenFondo1 = this.getClass().getResource
+        ("brickbreaker_verde.png");
         Image imaImagenEspacioVerde = Toolkit.getDefaultToolkit().
                 getImage(urlImagenFondo1);
 
@@ -400,18 +426,12 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         URL urlImagenPausa = this.getClass().getResource("pausa.gif");
         Image imaImagenPausa = Toolkit.getDefaultToolkit().
                 getImage(urlImagenPausa);
-        
-
-        if (bPausado) {
-            graGraficaFrame.drawImage(imaImagenPausa, 0, 10, this);
-            
-        } 
-        if (iNivel == 1) {
+        if (iNivel == 1 && !bPausado) {
             //Se despliega la imagen de fondo del nivel 1
             graGraficaFrame.drawImage(imaImagenEspacio, 0, 10,
                     getWidth(), getHeight(), this);
         }
-        if(iNivel == 2) {
+        if(iNivel == 2 && !bPausado) {
             //Se despliega la imagen de fondo del nivel 2
             graGraficaFrame.drawImage(imaImagenEspacioVerde, 0, 10,
                     getWidth(), getHeight(), this);
@@ -429,13 +449,16 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                     getImage(urlImagenStart);
             graGraficaFrame.drawImage(imaImagenStart, 165, 610, this);
         }
-        if (iVidas < 1) {
+        if (bGameOver) {
             URL urlImagenGameOver = this.getClass().
                     getResource("game_over.jpg");
             Image imaImagenGameOver = Toolkit.getDefaultToolkit().
                     getImage(urlImagenGameOver);
             graGraficaFrame.drawImage(imaImagenGameOver, 0, 10, this);
         }
+        if (bPausado) {
+            graGraficaFrame.drawImage(imaImagenPausa, 0, 10, this);  
+        } 
 
         // Actualiza el Foreground.
         graGraficaFrame.setColor(getForeground());
@@ -478,39 +501,46 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
   
             if (iNivel == 1) {
             g.drawImage(basMarcoDer.getImagen(), getWidth()
-                        - (basMarcoDer.getAncho() + 46), basMarcoDer.getY(), this);
+                        - (basMarcoDer.getAncho() + 46), 
+                    basMarcoDer.getY(), this);
             g.drawImage(basMarcoIzq.getImagen(), basMarcoIzq.getAncho() + 23,
                         basMarcoIzq.getY(), this);
             g.drawImage(basMarcoArr.getImagen(), getWidth()
-                        - (basMarcoArr.getAncho() + 68), basMarcoArr.getY(), this);
+                        - (basMarcoArr.getAncho() + 68), 
+                    basMarcoArr.getY(), this);
             g.drawImage(basMarcoAbj.getImagen(), getWidth()
-                        - (basMarcoArr.getAncho() + 68), getHeight() - 72, this); 
+                        - (basMarcoArr.getAncho() + 68), 
+                    getHeight() - 72, this); 
             }
             if (iNivel == 2) {
                 URL urlImagenMarcoLadoIzqAm = this.getClass().
                     getResource("barra_lados_am.png");
             Image imaImagenMarcoAmIzq = Toolkit.getDefaultToolkit().
                     getImage(urlImagenMarcoLadoIzqAm);
-            graGraficaFrame.drawImage(imaImagenMarcoAmIzq, basMarcoIzq.getAncho() + 23,
+            graGraficaFrame.drawImage(imaImagenMarcoAmIzq, 
+                    basMarcoIzq.getAncho() + 23,
                         basMarcoIzq.getY(), this);
             URL urlImagenMarcoLadoDerAm = this.getClass().
                     getResource("barra_lados_am.png");
             Image imaImagenMarcoAmDer = Toolkit.getDefaultToolkit().
                     getImage(urlImagenMarcoLadoDerAm);
             graGraficaFrame.drawImage(imaImagenMarcoAmDer, getWidth()
-                        - (basMarcoDer.getAncho() + 46), basMarcoDer.getY(), this);
+                        - (basMarcoDer.getAncho() + 46), 
+                    basMarcoDer.getY(), this);
             URL urlImagenMarcoArrAm = this.getClass().
                     getResource("barra_arriabajo_am.png");
             Image imaImagenMarcoArr = Toolkit.getDefaultToolkit().
                     getImage(urlImagenMarcoArrAm);
             graGraficaFrame.drawImage(imaImagenMarcoArr, getWidth()
-                        - (basMarcoArr.getAncho() + 68), basMarcoArr.getY(), this);
+                        - (basMarcoArr.getAncho() + 68), basMarcoArr.getY(), 
+                        this);
             URL urlImagenMarcoAbjAm = this.getClass().
                     getResource("barra_arriabajo_am.png");
             Image imaImagenMarcoAbj = Toolkit.getDefaultToolkit().
                     getImage(urlImagenMarcoAbjAm);
             graGraficaFrame.drawImage(imaImagenMarcoAbj, getWidth()
-                        - (basMarcoArr.getAncho() + 68), getHeight() - 72, this);
+                        - (basMarcoArr.getAncho() + 68), getHeight() - 72, 
+                        this);
             }
         }
     }
@@ -522,7 +552,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
             iDirBarra = 1; //Direccion a la derecha
         }
-        if (ke.getKeyCode() == KeyEvent.VK_SPACE && bPegado) {
+        if (ke.getKeyCode() == KeyEvent.VK_SPACE && bPegado && iNivel > 0) {
             bPegado = false;
             if (basBarra.getX() + basBarra.getAncho() / 2 < getWidth() / 2) {
                 iDirPelota = 2;
@@ -547,9 +577,13 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             }
             bEmpieza = true;
         }
-        if (ke.getKeyCode() == KeyEvent.VK_R) {
-            iNivel = 0;
-            bEmpieza = false;
+        if (ke.getKeyCode() == KeyEvent.VK_R && bGameOver == true) {
+            
+            init();
+            start();
+        }
+        if (ke.getKeyCode() == KeyEvent.VK_L){ //Para avanzar de nivel, cheat
+            bGameOver = true;
         }
     }
 
