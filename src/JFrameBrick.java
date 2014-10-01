@@ -1,6 +1,6 @@
 /**
  * JFrame Brick Breaker
- * 
+ *
  * @author Luis Angel, Jorge Marquez, Valeria Marroquin
  */
 import java.awt.Color;
@@ -20,14 +20,18 @@ import java.util.LinkedList;
 import javax.swing.JFrame;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import java.awt.Font;
 
 public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
-    public JFrameBrick(){
+
+    public JFrameBrick() {
         init();
         start();
     }
     //Declaración de variables
+    private SoundClip aucSonidoMusica;
+    private SoundClip aucSonidoAnfetaminas;
+    private SoundClip aucSonidoInicio;
     private Graphics graGraficaFrame;
     private Image imaImagenFrame;
     private Base basBarra; //Se crea la base llamada Barra
@@ -41,190 +45,240 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     private Base basMarcoArr; //Marcos arriba
     private Base basMarcoAbj; //Marcos abajo
     private int iDirBarra;
-    private int iCantidadBricks; //Cantidad de bricks en el applet
+    private int iCantidadBricks; //Cantidad de bricks 
     private int iVidas;
     private int iDirPelota; //Direccion de la pelota
     private boolean bPegado; //Cuando la pelota debe ir pegada a la barra
     private boolean bEmpieza;
     private boolean bPausado; //Variable que indica cuando el juego esta pausado
     private LinkedList lnkAnfetaminas; //Lista encadenada con todos los bricks
-    
-    
+    private int iScore;
+
     /*
      * Método init
      * 
      * Método en el que se inicializan las variables
      */
-    
-    public void init(){
+    public void init() {
         //Se le da al JFrame el siguiente tamaño
-        setSize(525,700);
+        setSize(525, 700);
         iDirBarra = 0; //La direccion es 0 para que no se mueva la barra
         iNivel = 0; //primer nivel
+        iScore = 0; //inicializa en cero 
         bCargoNivel = false;
         bEmpieza = false;
-        iCantidadBricks = 2;
+        iCantidadBricks = 0;
         iVidas = 3;
         iDirPelota = 0; //La pelota no se mueve
         bPegado = true; //Inicia la barra con la pelota pegada
         bPausado = false; //Al comenzar el juego no esta pausado
         //Se crea y posiciona la barra
         URL urlImagenBarra = this.getClass().getResource("barrita.png");
-        basBarra = new Base (0, 0, 
+        basBarra = new Base(0, 0,
                 Toolkit.getDefaultToolkit().getImage(urlImagenBarra));
         basBarra.setX(getWidth() / 2 - basBarra.getAncho() / 2);
         basBarra.setY(getHeight() - 100);
-        
+
         URL urlImagenPelota = this.getClass().getResource("bolita.png");
-        basPelota = new Base (0, 0, 
+        basPelota = new Base(0, 0,
                 Toolkit.getDefaultToolkit().getImage(urlImagenPelota));
-        basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2 - 
-                (basPelota.getAncho() / 2));
+        basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2
+                - (basPelota.getAncho() / 2));
         basPelota.setY(basBarra.getY() - basPelota.getAlto());
-        
+
         //Se inicializa la lista con las anfetaminas
         lnkAnfetaminas = new LinkedList();
-        for (int iI = 0; iI < 300; iI+= 100){
+        for (int iI = 0; iI < 300; iI += 100) {
             URL urlImagenAnfetamina = this.getClass().
                     getResource("anfetamina.jpg");
-            basAnfetamina = new Base(0, 0, 
+            basAnfetamina = new Base(0, 0,
                     Toolkit.getDefaultToolkit().getImage(urlImagenAnfetamina));
             basAnfetamina.setX(getWidth() / 4 + iI);
             basAnfetamina.setY(getHeight() / 2);
             //Se crea solo uno para casos de prueba
             lnkAnfetaminas.add(basAnfetamina);
         }
-        
-        //Se inicializan los marcos
-         URL urlImagenLados = this.getClass().getResource("barra_lados_am.png");
-        basMarcoDer = new Base(0,0, Toolkit.getDefaultToolkit().
+
+        //Se inicializan los marcos del nivel 1
+        URL urlImagenLados = this.getClass().getResource("barra_lados_ver.png");
+        basMarcoDer = new Base(0, 0, Toolkit.getDefaultToolkit().
                 getImage(urlImagenLados));
-        basMarcoDer.setX(getWidth() - (basMarcoDer.getAncho()+46));
-        basMarcoDer.setY(basMarcoDer.getY()+78);
-        basMarcoIzq = new Base(0, 0, 
+        basMarcoDer.setX(getWidth() - (basMarcoDer.getAncho() + 46));
+        basMarcoDer.setY(basMarcoDer.getY() + 78);
+        basMarcoIzq = new Base(0, 0,
                 Toolkit.getDefaultToolkit().getImage(urlImagenLados));
-        basMarcoIzq.setX(basMarcoIzq.getAncho()+20);
-        basMarcoIzq.setY(basMarcoIzq.getY() +78);
-        URL urlImagenArribaAbajo = this.getClass().getResource
-                ("barra_arriabajo_am.png");
-        
+        basMarcoIzq.setX(basMarcoIzq.getAncho() + 20);
+        basMarcoIzq.setY(basMarcoIzq.getY() + 78);
+        URL urlImagenArribaAbajo = this.getClass().getResource("barra_arriabajo_ver.png");
+
         //Marco de arriba
-        basMarcoArr = new Base(0,0, Toolkit.getDefaultToolkit().
+        basMarcoArr = new Base(0, 0, Toolkit.getDefaultToolkit().
                 getImage(urlImagenArribaAbajo));
-        basMarcoArr.setX(getWidth() - (basMarcoArr.getAncho()+68));
-        basMarcoArr.setY(basMarcoArr.getY()+78);
+        basMarcoArr.setX(getWidth() - (basMarcoArr.getAncho() + 68));
+        basMarcoArr.setY(basMarcoArr.getY() + 78);
         //Marco de abajo
-        basMarcoAbj = new Base(0, 0, 
+        basMarcoAbj = new Base(0, 0,
                 Toolkit.getDefaultToolkit().getImage(urlImagenArribaAbajo));
-        basMarcoAbj.setX(getWidth() - (basMarcoArr.getAncho()+68));
+        basMarcoAbj.setX(getWidth() - (basMarcoArr.getAncho() + 68));
         basMarcoAbj.setY(getHeight() - 72);
-                    
+               
         
-        setBackground (Color.yellow);
+        //musica de fondo
+        aucSonidoMusica = new SoundClip("musica.wav");
+        
+        
+        //efecto cuando chocas anfetaminas
+        aucSonidoAnfetaminas = new SoundClip ("avast.wav");
+        
+        //sonido inicio
+        aucSonidoInicio = new SoundClip ("intro.wav");
+        aucSonidoInicio.play();
+
+        setBackground(Color.yellow);
         addKeyListener(this);
     }
-    
-    public void start (){
-         // Declaras un hilo
-        Thread th = new Thread (this);
+
+    public void start() {
+        // Declaras un hilo
+        Thread th = new Thread(this);
         // Empieza el hilo
-        th.start ();
+        th.start();
     }
-    
-    public void checaColision(){
-        if (basBarra.colisiona(basMarcoIzq)){
-            basBarra.setX(basMarcoIzq.getAncho()+ 46);
+
+    public void checaColision() {
+        if (basBarra.colisiona(basMarcoIzq)) {
+            basBarra.setX(basMarcoIzq.getAncho() + 46);
         }
         if (basBarra.colisiona(basMarcoDer)) {
-            basBarra.setX(getWidth() -(basMarcoDer.getAncho() + 145));
+            basBarra.setX(getWidth() - (basMarcoDer.getAncho() + 145));
         }
-        if (basPelota.colisiona(basMarcoIzq)){
-            if(iDirPelota == 3){
+        if (basPelota.colisiona(basMarcoIzq)) {
+            if (iDirPelota == 3) {
                 iDirPelota = 4;
             }
-            if (iDirPelota == 2){
+            if (iDirPelota == 2) {
                 iDirPelota = 1;
             }
         }
-        if(basPelota.colisiona(basMarcoDer)){
-            if (iDirPelota == 4){
+        if (basPelota.colisiona(basMarcoDer)) {
+            if (iDirPelota == 4) {
                 iDirPelota = 3;
-            } 
-            if (iDirPelota == 1){
+            }
+            if (iDirPelota == 1) {
                 iDirPelota = 2;
             }
         }
-        if(basPelota.colisiona(basMarcoArr)){
-            if (iDirPelota == 1){
+        if (basPelota.colisiona(basMarcoArr)) {
+            if (iDirPelota == 1) {
                 iDirPelota = 4;
             }
-            if (iDirPelota == 2){
+            if (iDirPelota == 2) {
                 iDirPelota = 3;
             }
         }
-        if (basPelota.colisiona(basMarcoAbj)){
+        if (basPelota.colisiona(basMarcoAbj)) {
             bPegado = true;
             iVidas--;
         }
-        
-        if (basPelota.colisiona(basBarra)){
-            if (basPelota.getX()  < basBarra.getX() + basBarra.getAncho() / 2){
+
+        if (basPelota.colisiona(basBarra)) {
+            if (basPelota.getX() < basBarra.getX() + basBarra.getAncho() / 2) {
                 iDirPelota = 2;
-            } 
-            if (basPelota.getX() >= basBarra.getX() + basBarra.getAncho() / 2){
+            }
+            if (basPelota.getX() >= basBarra.getX() + basBarra.getAncho() / 2) {
                 iDirPelota = 1;
             }
         }
-        
+
         //Revisar si la pelota colisiona con alguna anfetamina
-        for (Object basBrick : lnkAnfetaminas){
+        for (Object basBrick : lnkAnfetaminas) {
             Base basAnfetamina = (Base) basBrick;
-            if (basPelota.colisiona(basAnfetamina)){
-                if(basAnfetamina.getX() < 
-                        basPelota.getX()){
-                    if(iDirPelota == 2){
+            if (basPelota.colisiona(basAnfetamina)) {
+                if (basAnfetamina.getX()
+                        < basPelota.getX()) {
+                    if (iDirPelota == 1) {
+                        iDirPelota = 3;
+                    }
+                    if (iDirPelota == 2) {
+                        iDirPelota = 4;
+                    }
+                    
+                }
+                if (basAnfetamina.getX() + basAnfetamina.getAncho()
+                        > basPelota.getX()) {
+                    if (iDirPelota == 1) {
+                        iDirPelota = 2;
+                    }
+                    if (iDirPelota == 2) {
                         iDirPelota = 1;
-                    } else {
-                        iDirPelota = 4;
                     }
-                }
-                if(basAnfetamina.getX() + basAnfetamina.getAncho() > 
-                        basPelota.getX()){
-                    if(iDirPelota == 1){
-                        iDirPelota = 2;
-                    } else {
+                    if (iDirPelota == 3) {
+                        iDirPelota = 4;
+                    }else {
                         iDirPelota = 3;
                     }
                 }
-                if(basAnfetamina.getY() + basAnfetamina.getAlto() < 
-                        basPelota.getY()){
-                    if(iDirPelota == 1){
-                        iDirPelota = 4;
-                    } else {
-                        iDirPelota = 3;
+                if (basAnfetamina.getY() + basAnfetamina.getAlto()
+                        < basPelota.getY()) {
+                    if (iDirPelota == 1) {
+                        iDirPelota = 2;
+                    } 
+                    if (iDirPelota == 2) {
+                        iDirPelota = 1;
                     }
                 }
-                if (basPelota.getY() + basPelota.getAlto() < basAnfetamina.getY()){
-                    if (iDirPelota == 4){
-                        iDirPelota= 1;
-                    } else {
+                if (basPelota.getY() + basPelota.getAlto() < basAnfetamina.getY()) {
+                    if (iDirPelota == 4) {
+                        iDirPelota = 1;
+                    } 
+                    if (iDirPelota == 3) {
                         iDirPelota = 2;
                     }
                 }
-            }
-            iCantidadBricks--;
-            basAnfetamina.setX(getWidth());
-            basAnfetamina.setY(getHeight());
+                reposicionaBricks(basAnfetamina);
+                iScore += 100;
+                iCantidadBricks--;
+                if (iCantidadBricks < 1) {
+                    reposicionaBarra(basBarra);
+                    reposicionaPelota(basPelota);
+                    iNivel = 2;
+                    try {
+                    cargaNivel2();
+                    } catch (IOException ex) {
+                      Logger.getLogger(JFrameBrick.class.getName()).
+                        log(Level.SEVERE, null, ex);
+                    }                   
+                }
+            }           
         }
     }
     
-    public void cargaNivel() throws IOException{
-        if (iNivel == 1 && !bCargoNivel){
+    public void reposicionaBricks(Base basAnfetamina) {
+        basAnfetamina.setX(-100);
+        basAnfetamina.setY(-100);
+
+    }
+    
+    public void reposicionaBarra(Base basBarra) {
+        basBarra.setX(getWidth() / 2 - basBarra.getAncho() / 2);
+        basBarra.setY(getHeight() - 100);
+    }
+    
+    public void reposicionaPelota(Base basPelota) {
+        basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2
+                - (basPelota.getAncho() / 2));
+        basPelota.setY(basBarra.getY() - basPelota.getAlto());
+        bPegado = !bPegado;
+    }
+
+    public void cargaNivel() throws IOException {
+        if (iNivel == 1 && !bCargoNivel) {
             BufferedReader brwEntrada;
             try {
                 brwEntrada = new BufferedReader(new FileReader("nivel1.txt"));
-            } catch(FileNotFoundException e){
-                File filPredeterminado = new File ("nivel0.txt");
+                aucSonidoMusica.play();
+            } catch (FileNotFoundException e) {
+                File filPredeterminado = new File("nivel0.txt");
                 PrintWriter prwSalida = new PrintWriter(filPredeterminado);
                 prwSalida.println("1");
                 prwSalida.println("100 100");
@@ -236,107 +290,146 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             iCantidadBricks = iCantidad;
             lnkAnfetaminas.clear();
             lnkAnfetaminas = new LinkedList();
-            for (int iI = 0; iI < iCantidad; iI++){
+            for (int iI = 0; iI < iCantidad; iI++) {
                 sAux = brwEntrada.readLine();
                 URL urlImagenAnfetamina = this.getClass().
                         getResource("anfetamina.jpg");
-                Base basAnfetamina = new Base (Integer.parseInt
-                (sAux.substring(0,sAux.indexOf(" "))),Integer.parseInt
-                ( sAux.substring(sAux.indexOf(" ")+1)), Toolkit.getDefaultToolkit().
+                Base basAnfetamina = new Base(Integer.parseInt(sAux.substring(0, sAux.indexOf(" "))), Integer.parseInt(sAux.substring(sAux.indexOf(" ") + 1)), Toolkit.getDefaultToolkit().
                         getImage(urlImagenAnfetamina));
                 lnkAnfetaminas.add(basAnfetamina);
-            } 
-        }
-        
-        
-        
+            }
+        }     
     }
     
-    public void run(){
-        while (iVidas > 0){
-            if (!bPausado){
+    public void cargaNivel2() throws IOException {
+        if (iNivel == 2) {
+            BufferedReader brwEntrada;
+            try {
+                brwEntrada = new BufferedReader(new FileReader("nivel2.txt"));
+            } catch (FileNotFoundException e) {
+                File filPredeterminado = new File("nivel0.txt");
+                PrintWriter prwSalida = new PrintWriter(filPredeterminado);
+                prwSalida.println("1");
+                prwSalida.println("100 100");
+                brwEntrada = new BufferedReader(new FileReader("nivel2.txt"));
+            }
+            String sAux = ""; //Se declara variable auxiliar vacia
+            int iCantidad; //Cantidad de bricks
+            iCantidad = Integer.parseInt(brwEntrada.readLine());
+            iCantidadBricks = iCantidad;
+            lnkAnfetaminas.clear();
+            lnkAnfetaminas = new LinkedList();
+            for (int iI = 0; iI < iCantidad; iI++) {
+                sAux = brwEntrada.readLine();
+                URL urlImagenAnfetamina = this.getClass().
+                        getResource("anfetamina.jpg");
+                Base basAnfetamina = new Base(Integer.parseInt(sAux.substring(0, sAux.indexOf(" "))), Integer.parseInt(sAux.substring(sAux.indexOf(" ") + 1)), Toolkit.getDefaultToolkit().
+                        getImage(urlImagenAnfetamina));
+                lnkAnfetaminas.add(basAnfetamina);
+            }
+        }        
+    }
+    
+    public void run() {
+        while (iVidas > 0) {
+            if (!bPausado) {
                 actualiza();
-                checaColision();   
+                checaColision();
             }
             repaint();
-            try	{
+            try {
                 // El thread se duerme.
-                Thread.sleep (20);
-            }
-            catch (InterruptedException iexError) {
-                System.out.println("Hubo un error en el juego " + 
-                        iexError.toString());
+                Thread.sleep(20);
+            } catch (InterruptedException iexError) {
+                System.out.println("Hubo un error en el juego "
+                        + iexError.toString());
             }
         }
     }
-    
-    public void actualiza(){
-        if (iDirBarra == 1){ //La direccion es la derecha
+
+    public void actualiza() {
+        if (iDirBarra == 1) { //La direccion es la derecha
             basBarra.setX(basBarra.getX() + 4);
         }
-        if (iDirBarra == 2){ //La direccion es a la izquierda
+        if (iDirBarra == 2) { //La direccion es a la izquierda
             basBarra.setX(basBarra.getX() - 4);
         }
-        if (bPegado){
-            basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2 - 
-                    (basPelota.getAncho() / 2));
+        if (bPegado) {
+            basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2
+                    - (basPelota.getAncho() / 2));
             basPelota.setY(basBarra.getY() - basPelota.getAlto());
         } else {
-            if (iDirPelota == 1){
+            if (iDirPelota == 1) {
                 basPelota.setY(basPelota.getY() - 3);
                 basPelota.setX(basPelota.getX() + 3);
             }
-            if (iDirPelota == 2){
+            if (iDirPelota == 2) {
                 basPelota.setY(basPelota.getY() - 3);
                 basPelota.setX(basPelota.getX() - 3);
             }
-            if (iDirPelota == 3){
+            if (iDirPelota == 3) {
                 basPelota.setY(basPelota.getY() + 3);
                 basPelota.setX(basPelota.getX() - 3);
             }
-            if (iDirPelota == 4){
+            if (iDirPelota == 4) {
                 basPelota.setY(basPelota.getY() + 3);
                 basPelota.setX(basPelota.getX() + 3);
             }
         }
     }
-    
-    public void paint (Graphics graGrafico){
+
+    public void paint(Graphics graGrafico) {
         // Inicializan el DoubleBuffer
-        if (imaImagenFrame == null){
-                imaImagenFrame = createImage (this.getSize().width, 
-                        this.getSize().height);
-                graGraficaFrame = imaImagenFrame.getGraphics ();
+        if (imaImagenFrame == null) {
+            imaImagenFrame = createImage(this.getSize().width,
+                    this.getSize().height);
+            graGraficaFrame = imaImagenFrame.getGraphics();
         }
-        
-        
-            //Se crea la imagen de fondo
-            URL urlImagenFondo = this.getClass().getResource
-            ("background1.png");
-            Image imaImagenEspacio = Toolkit.getDefaultToolkit().
+
+        //Se crea la imagen de fondo del nivel 1
+        URL urlImagenFondo = this.getClass().getResource("background_1.png");
+        Image imaImagenEspacio = Toolkit.getDefaultToolkit().
                 getImage(urlImagenFondo);
+        
+        //Se crea la imagen de fondo del nivel 2
+        URL urlImagenFondo1 = this.getClass().getResource("brickbreaker_verde.png");
+        Image imaImagenEspacioVerde = Toolkit.getDefaultToolkit().
+                getImage(urlImagenFondo1);
+
+        //Se crea la imagen para cuando el juego este pausado
+        URL urlImagenPausa = this.getClass().getResource("pausa.gif");
+        Image imaImagenPausa = Toolkit.getDefaultToolkit().
+                getImage(urlImagenPausa);
+        
+
+        if (bPausado) {
+            graGraficaFrame.drawImage(imaImagenPausa, 0, 10, this);
             
-            //Se crea la imagen para cuando el juego este pausado
-            URL urlImagenPausa = this.getClass().getResource("pausa.gif");
-            Image imaImagenPausa = Toolkit.getDefaultToolkit().
-                    getImage(urlImagenPausa);
-            
-            
-            if (bPausado){
-                graGraficaFrame.drawImage(imaImagenPausa, 0, 10, this);
-            } else {
-                    //Se despliega la imagen de fondo
-                    graGraficaFrame.drawImage(imaImagenEspacio, 0, 10,
+        } 
+        if (iNivel == 1) {
+            //Se despliega la imagen de fondo del nivel 1
+            graGraficaFrame.drawImage(imaImagenEspacio, 0, 10,
                     getWidth(), getHeight(), this);
-                }
-            if (!bEmpieza){
-                    URL urlImagenInicio = this.getClass().
-                            getResource("inicio.jpg");
-                    Image imaImagenInicio = Toolkit.getDefaultToolkit().
-                            getImage(urlImagenInicio);
-                    graGraficaFrame.drawImage(imaImagenInicio, 0, 10, this);
-            }
-        if(iVidas < 1){
+        }
+        if(iNivel == 2) {
+            //Se despliega la imagen de fondo del nivel 2
+            graGraficaFrame.drawImage(imaImagenEspacioVerde, 0, 10,
+                    getWidth(), getHeight(), this);
+        }
+        if (!bEmpieza) {
+            URL urlImagenInicio = this.getClass().
+                    getResource("inicio.jpg");
+            Image imaImagenInicio = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenInicio);
+            graGraficaFrame.drawImage(imaImagenInicio, 0, 10, this);
+            
+            URL urlImagenStart = this.getClass().
+                    getResource("start.gif");
+            Image imaImagenStart = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenStart);
+            graGraficaFrame.drawImage(imaImagenStart, 165, 610, this);
+        }
+        if (iVidas < 1) {
             URL urlImagenGameOver = this.getClass().
                     getResource("game_over.jpg");
             Image imaImagenGameOver = Toolkit.getDefaultToolkit().
@@ -345,68 +438,107 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         }
 
         // Actualiza el Foreground.
-        graGraficaFrame.setColor (getForeground());
+        graGraficaFrame.setColor(getForeground());
         paint1(graGraficaFrame);
 
         // Dibuja la imagen actualizada
-        graGrafico.drawImage (imaImagenFrame, 0, 0, this);
-    
-    }
-    
-    public void paint1(Graphics g) {
-        if (!bPausado && bEmpieza && iVidas>0){
-            
-            //Se pinta la barra
-            g.drawImage(basBarra.getImagen(), basBarra.getX(), 
-                basBarra.getY(), this);
-            
-            //Se pinta la pelota
-            g.drawImage (basPelota.getImagen(), basPelota.getX(),
-                basPelota.getY(), this);
-            for (Object basBrick : lnkAnfetaminas){
-                basAnfetamina = (Base) basBrick;
-                g.drawImage(basAnfetamina.getImagen(), basAnfetamina.getX(), 
-                    basAnfetamina.getY(), this);
-            }
-            
-            //Se pintan los marcos
-             g.drawImage(basMarcoDer.getImagen(), getWidth() - (basMarcoDer.getAncho()+46), 
-                    basMarcoDer.getY(), this);
-            g.drawImage(basMarcoIzq.getImagen(), basMarcoIzq.getAncho()+20,
-                    basMarcoIzq.getY(), this);
-            g.drawImage(basMarcoArr.getImagen(), getWidth() - (basMarcoArr.getAncho()+68), 
-                    basMarcoArr.getY(), this);
-            g.drawImage(basMarcoAbj.getImagen(), getWidth() - (basMarcoArr.getAncho()+68),
-                    getHeight() - 72, this);
+        graGrafico.drawImage(imaImagenFrame, 0, 0, this);
 
+    }
+
+    public void paint1(Graphics g) {
+        if (!bPausado && bEmpieza && iVidas > 0) {
+
+            //Se pinta la barra
+            g.drawImage(basBarra.getImagen(), basBarra.getX(),
+                    basBarra.getY(), this);
+
+            //Se pinta la pelota
+            g.drawImage(basPelota.getImagen(), basPelota.getX(),
+                    basPelota.getY(), this);
+
+            //Se pintan las anfetaminas
+            for (Object basBrick : lnkAnfetaminas) {
+                basAnfetamina = (Base) basBrick;
+                g.drawImage(basAnfetamina.getImagen(), basAnfetamina.getX(),
+                        basAnfetamina.getY(), this);
+            }
+
+            //se pone el score
+            g.setColor(Color.white);
+            g.setFont(new Font("Serif", Font.BOLD, 22));
+            g.drawString("" + iScore, 155, 60);
+
+            //se ponen las vidas
+            g.setColor(Color.white);
+            g.setFont(new Font("Serif", Font.BOLD, 22));
+            g.drawString("" + iVidas, 360, 60);
+
+            //Se pintan los marcos del nivel 1
+  
+            if (iNivel == 1) {
+            g.drawImage(basMarcoDer.getImagen(), getWidth()
+                        - (basMarcoDer.getAncho() + 46), basMarcoDer.getY(), this);
+            g.drawImage(basMarcoIzq.getImagen(), basMarcoIzq.getAncho() + 23,
+                        basMarcoIzq.getY(), this);
+            g.drawImage(basMarcoArr.getImagen(), getWidth()
+                        - (basMarcoArr.getAncho() + 68), basMarcoArr.getY(), this);
+            g.drawImage(basMarcoAbj.getImagen(), getWidth()
+                        - (basMarcoArr.getAncho() + 68), getHeight() - 72, this); 
+            }
+            if (iNivel == 2) {
+                URL urlImagenMarcoLadoIzqAm = this.getClass().
+                    getResource("barra_lados_am.png");
+            Image imaImagenMarcoAmIzq = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenMarcoLadoIzqAm);
+            graGraficaFrame.drawImage(imaImagenMarcoAmIzq, basMarcoIzq.getAncho() + 23,
+                        basMarcoIzq.getY(), this);
+            URL urlImagenMarcoLadoDerAm = this.getClass().
+                    getResource("barra_lados_am.png");
+            Image imaImagenMarcoAmDer = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenMarcoLadoDerAm);
+            graGraficaFrame.drawImage(imaImagenMarcoAmDer, getWidth()
+                        - (basMarcoDer.getAncho() + 46), basMarcoDer.getY(), this);
+            URL urlImagenMarcoArrAm = this.getClass().
+                    getResource("barra_arriabajo_am.png");
+            Image imaImagenMarcoArr = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenMarcoArrAm);
+            graGraficaFrame.drawImage(imaImagenMarcoArr, getWidth()
+                        - (basMarcoArr.getAncho() + 68), basMarcoArr.getY(), this);
+            URL urlImagenMarcoAbjAm = this.getClass().
+                    getResource("barra_arriabajo_am.png");
+            Image imaImagenMarcoAbj = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenMarcoAbjAm);
+            graGraficaFrame.drawImage(imaImagenMarcoAbj, getWidth()
+                        - (basMarcoArr.getAncho() + 68), getHeight() - 72, this);
+            }
         }
     }
 
-    @Override
     public void keyTyped(KeyEvent ke) {
     }
 
-    @Override
     public void keyPressed(KeyEvent ke) {
-        if (ke.getKeyCode() == KeyEvent.VK_RIGHT){
+        if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
             iDirBarra = 1; //Direccion a la derecha
-        }  
-        if (ke.getKeyCode() == KeyEvent.VK_SPACE && bPegado){
+        }
+        if (ke.getKeyCode() == KeyEvent.VK_SPACE && bPegado) {
             bPegado = false;
-            if (basBarra.getX() + basBarra.getAncho() / 2 < getWidth() / 2){
+            if (basBarra.getX() + basBarra.getAncho() / 2 < getWidth() / 2) {
                 iDirPelota = 2;
             } else {
                 iDirPelota = 1;
             }
         }
-        if (ke.getKeyCode() == KeyEvent.VK_P){
+        if (ke.getKeyCode() == KeyEvent.VK_P) {
             bPausado = !bPausado;
         }
-        if (ke.getKeyCode() == KeyEvent.VK_LEFT){
+        if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
             iDirBarra = 2; //Direccion a la izquierda
         }
-        if(ke.getKeyCode() == KeyEvent.VK_ENTER && !bEmpieza){
+        if (ke.getKeyCode() == KeyEvent.VK_ENTER && !bEmpieza) {
             iNivel = 1;
+            aucSonidoInicio.stop();
             try {
                 cargaNivel();
             } catch (IOException ex) {
@@ -415,7 +547,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             }
             bEmpieza = true;
         }
-        if (ke.getKeyCode() == KeyEvent.VK_R){
+        if (ke.getKeyCode() == KeyEvent.VK_R) {
             iNivel = 0;
             bEmpieza = false;
         }
@@ -427,4 +559,3 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     }
 
 }
-

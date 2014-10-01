@@ -1,4 +1,3 @@
-
 import javax.swing.ImageIcon;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -82,7 +81,7 @@ public class Base {
         // si se colisionan regreso verdadero, sino regreso falso
         return recObjeto.intersects(recParametro);
     }
-    
+ 
     public boolean colisiona(int iX, int iY) {
         // creo un objeto rectangulo a partir de este objeto Animal
         Rectangle recObjeto = new Rectangle(this.getX(),this.getY(),
