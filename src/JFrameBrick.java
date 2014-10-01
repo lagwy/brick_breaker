@@ -41,6 +41,8 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     private Base basMarcoArr; //Marcos arriba
     private Base basMarcoAbj; //Marcos abajo
     private int iDirBarra;
+    private int iCantidadBricks; //Cantidad de bricks en el applet
+    private int iVidas;
     private int iDirPelota; //Direccion de la pelota
     private boolean bPegado; //Cuando la pelota debe ir pegada a la barra
     private boolean bEmpieza;
@@ -61,6 +63,8 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         iNivel = 0; //primer nivel
         bCargoNivel = false;
         bEmpieza = false;
+        iCantidadBricks = 2;
+        iVidas = 3;
         iDirPelota = 0; //La pelota no se mueve
         bPegado = true; //Inicia la barra con la pelota pegada
         bPausado = false; //Al comenzar el juego no esta pausado
@@ -160,6 +164,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         }
         if (basPelota.colisiona(basMarcoAbj)){
             bPegado = true;
+            iVidas--;
         }
         
         if (basPelota.colisiona(basBarra)){
@@ -207,6 +212,9 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                     }
                 }
             }
+            iCantidadBricks--;
+            basAnfetamina.setX(getWidth());
+            basAnfetamina.setY(getHeight());
         }
     }
     
@@ -225,6 +233,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             String sAux = ""; //Se declara variable auxiliar vacia
             int iCantidad; //Cantidad de bricks
             iCantidad = Integer.parseInt(brwEntrada.readLine());
+            iCantidadBricks = iCantidad;
             lnkAnfetaminas.clear();
             lnkAnfetaminas = new LinkedList();
             for (int iI = 0; iI < iCantidad; iI++){
@@ -244,7 +253,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     }
     
     public void run(){
-        while (true){
+        while (iVidas > 0){
             if (!bPausado){
                 actualiza();
                 checaColision();   
@@ -312,24 +321,28 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             Image imaImagenPausa = Toolkit.getDefaultToolkit().
                     getImage(urlImagenPausa);
             
+            
             if (bPausado){
                 graGraficaFrame.drawImage(imaImagenPausa, 0, 10, this);
             } else {
-                if (iNivel == 1 && bEmpieza){
+                    //Se despliega la imagen de fondo
+                    graGraficaFrame.drawImage(imaImagenEspacio, 0, 10,
+                    getWidth(), getHeight(), this);
+                }
+            if (!bEmpieza){
                     URL urlImagenInicio = this.getClass().
                             getResource("inicio.jpg");
                     Image imaImagenInicio = Toolkit.getDefaultToolkit().
                             getImage(urlImagenInicio);
                     graGraficaFrame.drawImage(imaImagenInicio, 0, 10, this);
-                }
-                
-                //Se despliega la imagen de fondo
-                graGraficaFrame.drawImage(imaImagenEspacio, 0, 10,
-                getWidth(), getHeight(), this);
-        
             }
-            
-        
+        if(iVidas < 1){
+            URL urlImagenGameOver = this.getClass().
+                    getResource("game_over.jpg");
+            Image imaImagenGameOver = Toolkit.getDefaultToolkit().
+                    getImage(urlImagenGameOver);
+            graGraficaFrame.drawImage(imaImagenGameOver, 0, 10, this);
+        }
 
         // Actualiza el Foreground.
         graGraficaFrame.setColor (getForeground());
@@ -337,10 +350,11 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
 
         // Dibuja la imagen actualizada
         graGrafico.drawImage (imaImagenFrame, 0, 0, this);
+    
     }
     
     public void paint1(Graphics g) {
-        if (!bPausado){
+        if (!bPausado && bEmpieza && iVidas>0){
             
             //Se pinta la barra
             g.drawImage(basBarra.getImagen(), basBarra.getX(), 
