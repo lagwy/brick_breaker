@@ -28,7 +28,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         init();
         start();
     }
-    //Declaración de variables
+    //Declaracion de variables
     private SoundClip aucSonidoMusica;
     private SoundClip aucSonidoAnfetaminas;
     private SoundClip aucSonidoInicio;
@@ -54,18 +54,18 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
     private boolean bEmpieza;
     private boolean bPausado; //Variable que indica cuando el juego esta pausado
     private boolean bGameOver; //Se termina el juego y se puede reiniciar
-    private boolean bComprueba; //Comprueba que no se re-cambie la dirección
+    private boolean bComprueba; //Comprueba que no se re-cambie la direccion
     private boolean bSirena;
     private LinkedList lnkAnfetaminas; //Lista encadenada con todos los bricks
     private int iScore;
 
     /*
-     * Método init
+     * Metodo init
      * 
-     * Método en el que se inicializan las variables
+     * Metodo en el que se inicializan las variables
      */
     public void init() {
-        //Se le da al JFrame el siguiente tamaño
+        //Se le da al JFrame el siguiente tamano
         setSize(525, 700);
         iDirBarra = 0; //La direccion es 0 para que no se mueva la barra
         iNivel = 0; //primer nivel
@@ -82,13 +82,13 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         bPegado = true; //Inicia la barra con la pelota pegada
         bPausado = false; //Al comenzar el juego no esta pausado
         //Se crea y posiciona la barra
-        URL urlImagenBarra = this.getClass().getResource("barrita.png");
+        URL urlImagenBarra = this.getClass().getResource("images/barrita.png");
         basBarra = new Base(0, 0,
                 Toolkit.getDefaultToolkit().getImage(urlImagenBarra));
         basBarra.setX(getWidth() / 2 - basBarra.getAncho() / 2);
         basBarra.setY(getHeight() - 100);
 
-        URL urlImagenPelota = this.getClass().getResource("bolita.png");
+        URL urlImagenPelota = this.getClass().getResource("images/bolita.png");
         basPelota = new Base(0, 0,
                 Toolkit.getDefaultToolkit().getImage(urlImagenPelota));
         basPelota.setX(basBarra.getX() + basBarra.getAncho() / 2
@@ -99,7 +99,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         lnkAnfetaminas = new LinkedList();
         for (int iI = 0; iI < 300; iI += 100) {
             URL urlImagenAnfetamina = this.getClass().
-                    getResource("anfetamina.jpg");
+                    getResource("images/anfetamina.jpg");
             basAnfetamina = new Base(0, 0,
                     Toolkit.getDefaultToolkit().getImage(urlImagenAnfetamina));
             basAnfetamina.setX(getWidth() / 4 + iI);
@@ -109,7 +109,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         }
         
         //Se inicializan los marcos del nivel 1
-        URL urlImagenLados = this.getClass().getResource("barra_lados_ver.png");
+        URL urlImagenLados = this.getClass().getResource("images/barra_lados_ver.png");
         basMarcoDer = new Base(0, 0, Toolkit.getDefaultToolkit().
                 getImage(urlImagenLados));
         basMarcoDer.setX(getWidth() - (basMarcoDer.getAncho() + 46));
@@ -118,7 +118,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                 Toolkit.getDefaultToolkit().getImage(urlImagenLados));
         basMarcoIzq.setX(basMarcoIzq.getAncho() + 20);
         basMarcoIzq.setY(basMarcoIzq.getY() + 78);
-        URL urlImagenArribaAbajo = this.getClass().getResource("barra_arriabajo_ver.png");
+        URL urlImagenArribaAbajo = this.getClass().getResource("images/barra_arriabajo_ver.png");
 
         //Marco de arriba
         basMarcoArr = new Base(0, 0, Toolkit.getDefaultToolkit().
@@ -132,21 +132,21 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         basMarcoAbj.setY(getHeight() - 72);
                
         
-        URL urlImagenSirena = this.getClass().getResource("sirena.gif");
+        URL urlImagenSirena = this.getClass().getResource("images/sirena.gif");
         basSirena = new Base(0, 0, Toolkit.getDefaultToolkit().
                 getImage(urlImagenSirena));
         basSirena.setY(-250);
         basSirena.setX(getWidth() / 2);
         
         //musica de fondo
-        aucSonidoMusica = new SoundClip("musica.wav");
+        aucSonidoMusica = new SoundClip("sounds/musica.wav");
         
         
         //efecto cuando chocas anfetaminas
-        aucSonidoAnfetaminas = new SoundClip ("avast.wav");
+        aucSonidoAnfetaminas = new SoundClip ("sounds/avast.wav");
         
         //sonido inicio
-        aucSonidoInicio = new SoundClip ("intro.wav");
+        aucSonidoInicio = new SoundClip ("sounds/intro.wav");
         aucSonidoInicio.play();
 
         setBackground(Color.yellow);
@@ -322,7 +322,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         if (iNivel == 1 && !bCargoNivel) {
             BufferedReader brwEntrada;
             try {
-                brwEntrada = new BufferedReader(new FileReader("nivel1.txt"));
+                brwEntrada = new BufferedReader(new FileReader("levels/nivel1.txt"));
                 aucSonidoMusica.setRepeat(15);
                 aucSonidoMusica.play();
             } catch (FileNotFoundException e) {
@@ -330,7 +330,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
                 PrintWriter prwSalida = new PrintWriter(filPredeterminado);
                 prwSalida.println("1");
                 prwSalida.println("100 100");
-                brwEntrada = new BufferedReader(new FileReader("nivel1.txt"));
+                brwEntrada = new BufferedReader(new FileReader("levels/nivel1.txt"));
             }
             String sAux = ""; //Se declara variable auxiliar vacia
             int iCantidad; //Cantidad de bricks
@@ -341,7 +341,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             for (int iI = 0; iI < iCantidad; iI++) {
                 sAux = brwEntrada.readLine();
                 URL urlImagenAnfetamina = this.getClass().
-                        getResource("anfetamina.jpg");
+                        getResource("images/anfetamina.jpg");
                 Base basAnfetamina = new Base(Integer.parseInt(sAux.substring(0,
                         sAux.indexOf(" "))), Integer.parseInt(sAux.substring
                     (sAux.indexOf(" ") + 1)), Toolkit.getDefaultToolkit().
@@ -356,13 +356,13 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         if (iNivel == 2) {
             BufferedReader brwEntrada;
             try {
-                brwEntrada = new BufferedReader(new FileReader("nivel2.txt"));
+                brwEntrada = new BufferedReader(new FileReader("levels/nivel2.txt"));
             } catch (FileNotFoundException e) {
                 File filPredeterminado = new File("nivel0.txt");
                 PrintWriter prwSalida = new PrintWriter(filPredeterminado);
                 prwSalida.println("1");
                 prwSalida.println("100 100");
-                brwEntrada = new BufferedReader(new FileReader("nivel2.txt"));
+                brwEntrada = new BufferedReader(new FileReader("levels/nivel2.txt"));
             }
             String sAux = ""; //Se declara variable auxiliar vacia
             int iCantidad; //Cantidad de bricks
@@ -373,7 +373,7 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             for (int iI = 0; iI < iCantidad; iI++) {
                 sAux = brwEntrada.readLine();
                 URL urlImagenAnfetamina = this.getClass().
-                        getResource("anfetamina.jpg");
+                        getResource("images/anfetamina.jpg");
                 Base basAnfetamina = new Base(Integer.parseInt(sAux.substring(0, 
                         sAux.indexOf(" "))), Integer.parseInt(sAux.substring
                         (sAux.indexOf(" ") + 1)), Toolkit.getDefaultToolkit().
@@ -447,18 +447,18 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         }
 
         //Se crea la imagen de fondo del nivel 1
-        URL urlImagenFondo = this.getClass().getResource("background_1.png");
+        URL urlImagenFondo = this.getClass().getResource("images/background_1.png");
         Image imaImagenEspacio = Toolkit.getDefaultToolkit().
                 getImage(urlImagenFondo);
         
         //Se crea la imagen de fondo del nivel 2
         URL urlImagenFondo1 = this.getClass().getResource
-        ("brickbreaker_verde.png");
+        ("images/brickbreaker_verde.png");
         Image imaImagenEspacioVerde = Toolkit.getDefaultToolkit().
                 getImage(urlImagenFondo1);
 
         //Se crea la imagen para cuando el juego este pausado
-        URL urlImagenPausa = this.getClass().getResource("pausa.gif");
+        URL urlImagenPausa = this.getClass().getResource("images/pausa.gif");
         Image imaImagenPausa = Toolkit.getDefaultToolkit().
                 getImage(urlImagenPausa);
         if (iNivel == 1 && !bPausado) {
@@ -473,25 +473,25 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
         }
         if (!bEmpieza) {
             URL urlImagenInicio = this.getClass().
-                    getResource("inicio.jpg");
+                    getResource("images/inicio.jpg");
             Image imaImagenInicio = Toolkit.getDefaultToolkit().
                     getImage(urlImagenInicio);
             graGraficaFrame.drawImage(imaImagenInicio, 0, 10, this);
             
             URL urlImagenStart = this.getClass().
-                    getResource("start.gif");
+                    getResource("images/start.gif");
             Image imaImagenStart = Toolkit.getDefaultToolkit().
                     getImage(urlImagenStart);
             graGraficaFrame.drawImage(imaImagenStart, getWidth() / 6, 610, this);
         }
         if (bGameOver) {          
             URL urlImagenGameOver = this.getClass().
-                    getResource("game_over.jpg");
+                    getResource("images/game_over.jpg");
             Image imaImagenGameOver = Toolkit.getDefaultToolkit().
                     getImage(urlImagenGameOver);
             graGraficaFrame.drawImage(imaImagenGameOver, 0, 10, this);
             
-            URL urlImagenRestart = this.getClass().getResource("restart.gif");
+            URL urlImagenRestart = this.getClass().getResource("images/restart.gif");
             Image imaImagenRestart = Toolkit.getDefaultToolkit().
                     getImage(urlImagenRestart);
             graGraficaFrame.drawImage(imaImagenRestart, getWidth() / 6, 
@@ -517,10 +517,10 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             //Se pinta la barra dependiendo si esta el power up o no
             if (bSirena){
                 URL urlImagenBarra = this.getClass().
-                        getResource("barrita.png");
+                        getResource("images/barrita.png");
                 Image imaImagenBarra = Toolkit.getDefaultToolkit().
                         getImage(urlImagenBarra);
-                URL urlImagenPelota = this.getClass().getResource("bolita.png");
+                URL urlImagenPelota = this.getClass().getResource("images/bolita.png");
                 Image imaImagenPelota = Toolkit.getDefaultToolkit().
                         getImage(urlImagenPelota);
                 basBarra.setImagen(imaImagenBarra);
@@ -532,12 +532,12 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             }
             if(!bSirena){
                 URL urlImagenBarraSirena = this.getClass().
-                        getResource("barra_sirena.gif");
+                        getResource("images/barra_sirena.gif");
                 Image imaImagenBarraSirena = Toolkit.getDefaultToolkit().
                     getImage(urlImagenBarraSirena);
                 basBarra.setImagen(imaImagenBarraSirena);
                 URL urlImagenPelotaSirena = this.getClass().getResource
-                    ("camioneta_bolita.gif");
+                    ("images/camioneta_bolita.gif");
                 Image imaImagenPelotaSirena = Toolkit.getDefaultToolkit().
                       getImage(urlImagenPelotaSirena);
                 basPelota.setImagen(imaImagenPelotaSirena);
@@ -587,28 +587,28 @@ public final class JFrameBrick extends JFrame implements Runnable, KeyListener {
             }
             if (iNivel == 2) {
                 URL urlImagenMarcoLadoIzqAm = this.getClass().
-                    getResource("barra_lados_am.png");
+                    getResource("images/barra_lados_am.png");
             Image imaImagenMarcoAmIzq = Toolkit.getDefaultToolkit().
                     getImage(urlImagenMarcoLadoIzqAm);
             graGraficaFrame.drawImage(imaImagenMarcoAmIzq, 
                     basMarcoIzq.getAncho() + 23,
                         basMarcoIzq.getY(), this);
             URL urlImagenMarcoLadoDerAm = this.getClass().
-                    getResource("barra_lados_am.png");
+                    getResource("images/barra_lados_am.png");
             Image imaImagenMarcoAmDer = Toolkit.getDefaultToolkit().
                     getImage(urlImagenMarcoLadoDerAm);
             graGraficaFrame.drawImage(imaImagenMarcoAmDer, getWidth()
                         - (basMarcoDer.getAncho() + 46), 
                     basMarcoDer.getY(), this);
             URL urlImagenMarcoArrAm = this.getClass().
-                    getResource("barra_arriabajo_am.png");
+                    getResource("images/barra_arriabajo_am.png");
             Image imaImagenMarcoArr = Toolkit.getDefaultToolkit().
                     getImage(urlImagenMarcoArrAm);
             graGraficaFrame.drawImage(imaImagenMarcoArr, getWidth()
                         - (basMarcoArr.getAncho() + 68), basMarcoArr.getY(), 
                         this);
             URL urlImagenMarcoAbjAm = this.getClass().
-                    getResource("barra_arriabajo_am.png");
+                    getResource("images/barra_arriabajo_am.png");
             Image imaImagenMarcoAbj = Toolkit.getDefaultToolkit().
                     getImage(urlImagenMarcoAbjAm);
             graGraficaFrame.drawImage(imaImagenMarcoAbj, getWidth()
